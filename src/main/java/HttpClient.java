@@ -16,20 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class HttpClient {
-	
 	private static final String USER_AGENT = "Mozilla/5.0";
-	public static void main(String[] args) throws Exception {
-		
-		HttpClient http = new HttpClient();
-		
-		Log.warning("Testing 1 - Send Http GET request");
-		http.sendGet("http://www.google.com/");
-		
-		Log.warning("Testing 2 - Send Http POST request");
-		http.sendPost("https://selfsolve.apple.com/wcResults.do");
-		
-	}
-	
 	
 	// HTTP GET request
 	static HttpResponse sendGet(String url) throws Exception {
@@ -51,8 +38,6 @@ public class HttpClient {
 	
 	// HTTP POST request
 	static HttpResponse sendPost(String url) throws IOException {
-		//String url = "https://selfsolve.apple.com/wcResults.do";
-		
 		org.apache.http.client.HttpClient client = new DefaultHttpClient();
 		HttpPost post = new HttpPost(url);
 		
@@ -64,8 +49,6 @@ public class HttpClient {
 	}
 	
 	static void sendPost(String url, HashMap<String, String> httpParameters) throws IOException {
-		//String url = "https://selfsolve.apple.com/wcResults.do";
-		
 		org.apache.http.client.HttpClient client = new DefaultHttpClient();
 		HttpPost post = new HttpPost(url);
 		
@@ -103,7 +86,7 @@ public class HttpClient {
 				new InputStreamReader(response.getEntity().getContent()));
 		
 		StringBuffer result = new StringBuffer();
-		String line = "";
+		String line;
 		while ((line = rd.readLine()) != null) {
 			result.append(line);
 		}

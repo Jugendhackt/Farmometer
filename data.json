@@ -1,0 +1,10 @@
+{
+    "header": {
+        "last-updated": "2019-04-10T12:28:31"
+    },
+    "data": {
+        "temp": 25.1,
+        "humidity": 1.1,
+        "watercontent": 1.1
+    }
+}
