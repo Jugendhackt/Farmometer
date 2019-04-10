@@ -3,6 +3,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
@@ -12,6 +15,7 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		Log.status("[1/5] connect to database");
 		db = new Database();
+		
 		Log.status("[2/5] start background thread");
 		Thread blocksUpdate = new Thread(() -> {
 			String last_update = null;
@@ -50,6 +54,7 @@ public class Main {
 		
 		//param: name, email, ...
 		host.addContext("/get/data", new getDataHandler());
+		host.addContext("/update/water", new updateHandler(), "POST");
 		
 		
 		try {
@@ -84,6 +89,44 @@ public class Main {
 		}
 	}
 	
+	private static class updateHandler implements HTTPServer.ContextHandler {
+		@Override
+		public int serve(HTTPServer.Request request, HTTPServer.Response response) throws IOException {
+			Map<String, String> params = request.getParams();
+			//date: yyyy-MM-ddTHH:mm:ssZ + water:amount --> ?date="date"&water=amount
+			
+			String amount = null;
+			try {
+				amount = params.get("water");
+			} catch (NullPointerException e) {
+				Log.error("NullPointerException");
+				sendBadApiReq(response);
+			}
+			
+			db.execute("INSERT INTO vokTrainer.water_refill VALUES (?,?)",
+					new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(new Date()),
+					amount);
+			
+			JSONObject responseObject = new JSONObject();
+			JSONObject header = new JSONObject();
+			
+			header.put("params", params);
+			header.put("status", 200);
+			
+			response.getHeaders().add("Content-Type", "application/json");
+			response.getHeaders().add("Access-Control-Allow-Origin", "*");
+			
+			//TODO Redirect to referer
+			response.getHeaders().add("Location", request.getHeaders().get("Referer")); //TODO DAS HIER IST PRAKTISCH
+			try {
+				response.send(302, responseObject.toString());
+			} catch (IOException e) {
+				Log.error("Response cannot be sent");
+			}
+			return 0;
+		}
+	}
+	
 	private static class getDataHandler implements HTTPServer.ContextHandler {
 		@Override
 		public int serve(HTTPServer.Request request, HTTPServer.Response response) throws IOException {
@@ -91,7 +134,7 @@ public class Main {
 			JSONObject header = new JSONObject();
 			JSONObject infos = new JSONObject();
 			
-			header.put("last-updated", /*new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(new Date())*/ getLastUpdate());
+			header.put("last-updated", getLastUpdate());
 			infos.put("temp", getTemp());
 			infos.put("humidity", getHum());
 			
@@ -102,6 +145,7 @@ public class Main {
 			sendResponse(response, 200, responseObject);
 			return 0;
 		}
+	
 	}
 	
 	static void sendResponse(HTTPServer.Response response, int status, JSONObject responseObject) {
