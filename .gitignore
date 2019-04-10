@@ -96,3 +96,6 @@ fabric.properties
 # Editor-based Rest Client
 .idea/httpRequests
 
+src/main/resources/
+src/test/
+/src/main/java/Keys.java
