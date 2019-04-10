@@ -33,7 +33,6 @@ public class HttpClient {
 		
 		//Log.status("Sending 'GET' request to URL : " + url);
 		return response;
-		
 	}
 	
 	// HTTP POST request

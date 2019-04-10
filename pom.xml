@@ -6,7 +6,7 @@
 
   <groupId>vernetztewelten.de.jugendhackt</groupId>
   <artifactId>Farmometer</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>DEV</version>
 
   <dependencies>
 

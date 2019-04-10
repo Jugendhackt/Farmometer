@@ -12,13 +12,6 @@ public class Log {
 		System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " > " + text);
 	}
 	
-	static void special(String text) {
-	
-	}
-	static void special(String text, String font) {
-	
-	}
-	
 	static void status(String text) {
 		write(text);
 	}
