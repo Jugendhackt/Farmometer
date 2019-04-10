@@ -3,18 +3,38 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 
 public class Main {
 	static public JSONArray blocks = new JSONArray();
+	static Database db = null;
 	
 	public static void main(String[] args) throws Exception {
-		
+		Log.status("[1/5] connect to database");
+		db = new Database();
+		Log.status("[2/5] start background thread");
 		Thread blocksUpdate = new Thread(() -> {
+			String last_update = null;
+			boolean noNewUpdate = false;
+			
 			while (true) {
 				try {
 					blocks = HttpClient.responseAsJsonA(HttpClient.sendGet(
 							"https://io.adafruit.com/api/v2/m4schini/dashboards/hackathon1/blocks"));
+					if (getLastUpdate().equals(last_update)) {
+						if (!noNewUpdate)
+						Log.warning("No new update. Last update: " + last_update);
+						noNewUpdate = true;
+					} else {
+						last_update = getLastUpdate();
+						addToDB();
+						//Log.status("updated information\nTemp: " + getTemp() + "\nHumidity: " + getHum());
+						noNewUpdate = false;
+					}
+					
 					
 					//System.out.println(blocks);
 					Thread.sleep(5000);
@@ -22,16 +42,11 @@ public class Main {
 					e.printStackTrace();
 					Log.critical("Something happened");
 				}
-				try {
-					//addToDB();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				Log.status("updated information\nTemp: " + getTemp() + "\nHumidity: " + getHum());
 			}
 		});
 		blocksUpdate.start();
 		
+		Log.status("[3/5] initialize http server");
 		HTTPServer server = new HTTPServer(1337);
 		HTTPServer.VirtualHost host = server.getVirtualHost(null);
 		//All responses have statuses in header to check for errors
@@ -41,14 +56,14 @@ public class Main {
 		
 		
 		try {
+			Log.status("[4/5] start http server");
 			server.start();
 		} catch (IOException e) {
 			Log.critical("httpserver start failed");
 			Log.critical("Aborting Server");
 			System.exit(-1);
 		}
-		Log.success("httpserver start succesful");
-		
+		Log.success("[5/5] Everything initalized\n");
 		
 		Log.success("Hello Admin");
 		Scanner scanner = new Scanner(System.in);
@@ -70,10 +85,6 @@ public class Main {
 				System.out.println(blocks);
 			}
 		}
-		
-		
-		
-		
 	}
 	
 	private static class getDataHandler implements HTTPServer.ContextHandler {
@@ -121,16 +132,18 @@ public class Main {
 		return 400;
 	}
 	
-/*
 	private static void addToDB() {
-		String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(new Date());
-		db.execute("INSERT INTO vokTrainer.history VALUES (?,?,?)",
-				date,
-				getTemp(),
-				getHum()
-		);
+		try {
+			db.execute("INSERT INTO vokTrainer.history VALUES (?,?,?)",
+					getLastUpdate(),
+					getTemp(),
+					getHum()
+			);
+		} catch (Exception e) {
+			Log.error("SQLIntegrityConstraintViolationException");
+		}
 	}
-	*/
+	
 	private static Float getTemp() {
 		return blocks
 				.getJSONObject(1)

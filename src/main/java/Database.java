@@ -13,7 +13,7 @@ public class Database {
 			String database = Keys.DB_DATABASE;
 			String username = Keys.DB_USERNAME;
 			String password = Keys.DB_PASSWORD;
-			
+
 			connection = DriverManager.getConnection(
 					"jdbc:mariadb://" + host + ":3306/" + database + "?autoReconnect=true",
 					username, password);

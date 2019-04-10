@@ -6,8 +6,8 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="Farmometer_Copy" />
         <module name="Farmometer" />
+        <module name="Farmometer_Copy" />
       </profile>
     </annotationProcessing>
   </component>
