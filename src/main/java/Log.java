@@ -1,7 +1,12 @@
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+
+/**
+ * @author Malte Schink (m4schini)
+ */
 public class Log {
+	
 	
 	private static void write(String text) {
 		System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " > " + text);
