@@ -3,6 +3,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -31,14 +33,14 @@ public class Main {
 						noNewUpdate = true;
 					} else {
 						last_update = getLastUpdate();
-						addToDB();
+						addToDB(); //TODO ACTIVATE BEFORE COMPILATION
 						//Log.status("updated information\nTemp: " + getTemp() + "\nHumidity: " + getHum());
 						noNewUpdate = false;
 					}
 					
 					
 					//System.out.println(blocks);
-					Thread.sleep(5000);
+					Thread.sleep(60000);
 				} catch (Exception e) {
 					e.printStackTrace();
 					Log.critical("Something happened");
@@ -137,7 +139,16 @@ public class Main {
 			header.put("last-updated", getLastUpdate());
 			infos.put("temp", getTemp());
 			infos.put("humidity", getHum());
+			ResultSet resultSet = db.execute("SELECT date, amount_ml FROM water_refill ORDER BY date DESC LIMIT 1");
 			
+			try {
+				resultSet.next();
+				infos.put("last_refill_date", resultSet.getString("date"));
+				infos.put("last_refill_amount", resultSet.getInt("amount_ml"));
+			} catch (SQLException e) {
+				Log.error("[DB] Something went wrong");
+				e.printStackTrace();
+			}
 			
 			responseObject.put("header", header);
 			responseObject.put("data", infos);
